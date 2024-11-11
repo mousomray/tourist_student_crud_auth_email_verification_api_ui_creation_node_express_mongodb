@@ -17,9 +17,13 @@ app.use('/uploads', express.static(__dirname + '/uploads'));
 const authrouter = require('./app/router/authrouter/authrouter.js');
 app.use('/auth', authrouter);
 
-// API router
+// API tourist router
 const touristrouter = require('./app/router/apirouter/touristrouter');
 app.use('/api', touristrouter);
+
+// API student router
+const studentrouter = require('./app/router/apirouter/studentrouter');
+app.use('/api', studentrouter);
 
 const port = 3004
 app.listen(port, () => {

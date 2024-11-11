@@ -4,14 +4,6 @@ class touristcontroller {
 
     // Create API 
     async create(req, res) {
-        // Token Fit in Header
-        const token = req.headers['x-access-token'];
-        console.log("Received Token:", token);
-        if (!token) {
-            return res.status(401).json({
-                message: "Access denied. No token provided."
-            });
-        }
         try {
             // This code is for uploading image with validation
             if (!req.file) {
@@ -34,18 +26,8 @@ class touristcontroller {
         }
     }
 
-
-
     // Get API 
     async getall(req, res) {
-        // Token Fit in Header
-        const token = req.headers['x-access-token'];
-        console.log("Received Token:", token);
-        if (!token) {
-            return res.status(401).json({
-                message: "Access denied. No token provided."
-            });
-        }
         try {
             const data = await Tourist.find()
             res.status(200).json({
@@ -61,14 +43,6 @@ class touristcontroller {
 
     // Get Single 
     async getsingle(req, res) {
-        // Token Fit in Header
-        const token = req.headers['x-access-token'];
-        console.log("Received Token:", token);
-        if (!token) {
-            return res.status(401).json({
-                message: "Access denied. No token provided."
-            });
-        }
         const id = req.params.id;
         try {
             const data = await Tourist.findById(id);
@@ -85,14 +59,6 @@ class touristcontroller {
 
     // Update Data
     async touristupdate(req, res) {
-        // Token Fit in Header
-        const token = req.headers['x-access-token'];
-        console.log("Received Token:", token);
-        if (!token) {
-            return res.status(401).json({
-                message: "Access denied. No token provided."
-            });
-        }
         const id = req.params.id;
         try {
             const updatedtourist = await Tourist.findByIdAndUpdate(id, req.body, { new: true, runValidators: true }
@@ -117,16 +83,8 @@ class touristcontroller {
         }
     }
 
-    // Delete Student
+    // Delete Tourist
     async touristdelete(req, res) {
-        // Token Fit in Header
-        const token = req.headers['x-access-token'];
-        console.log("Received Token:", token);
-        if (!token) {
-            return res.status(401).json({
-                message: "Access denied. No token provided."
-            });
-        }
         const id = req.params.id;
         try {
             const deletedtourist = await Tourist.findByIdAndDelete(id);

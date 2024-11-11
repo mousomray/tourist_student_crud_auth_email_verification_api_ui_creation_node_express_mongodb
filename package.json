@@ -1,5 +1,5 @@
 {
-  "name": "backend_jwt_authentication",
+  "name": "tourist_student_crud_auth_api_creation_node_express_mongodb",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",

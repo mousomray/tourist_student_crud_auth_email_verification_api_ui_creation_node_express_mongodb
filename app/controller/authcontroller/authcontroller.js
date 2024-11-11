@@ -111,34 +111,20 @@ class authcontroller {
     // Fetching Dashboard Data 
     async dashboard(req, res) {
         try {
-            // Token Fit in Header
-            const token = req.headers['x-access-token'];
-            console.log("Received Token:", token);
-            if (!token) {
-                return res.status(401).json({
-                    message: "Access denied. No token provided."
-                });
+            const user = req.user;
+            if (!user) {
+                return res.status(401).json({ message: "Unauthorized access. No user information found." });
             }
-            try {
-                const decoded = jwt.verify(token, process.env.API_KEY);
-                console.log("Decoded Token:", decoded);
-                res.status(200).json({
-                    message: "Welcome to user dashboard",
-                    user: decoded
-                });
-            } catch (err) {
-                console.log("JWT Error:", err.message);
-                return res.status(401).json({
-                    message: "Invalid or expired token."
-                });
-            }
-        } catch (err) {
-            console.error("Server Error:", err.message);
-            res.status(500).json({
-                message: "Server error"
+            console.log("User Data:", user);
+            res.status(200).json({
+                message: "Welcome to the user dashboard",
+                user: user
             });
+        } catch (error) {
+            console.error("Server Error:", error.message);
+            res.status(500).json({ message: "Server error" });
         }
-    }
+    };
 
 }
 module.exports = new authcontroller()

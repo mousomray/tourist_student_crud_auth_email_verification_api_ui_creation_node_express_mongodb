@@ -1,11 +1,27 @@
-//**bcryptjs** একটি লাইব্রেরি যা পাসওয়ার্ড সুরক্ষিতভাবে হ্যাশ করতে, সাল্ট তৈরি করতে এবং আক্রমণকারীদের থেকে সুরক্ষা প্রদান করতে ব্যবহৃত হয়।
+const jwt = require('jsonwebtoken'); // For Token
+const bcrypt = require('bcryptjs'); // For Password Hashing
 
-//**compareSync** মেথডটি পাসওয়ার্ড এবং হ্যাশড পাসওয়ার্ডের মধ্যে মিল আছে কিনা তা সিঙ্ক্রোনাসভাবে পরীক্ষা করার জন্য ব্যবহৃত হয়।
-
-const bcrypt = require('bcryptjs');
+// Compare password function
 const comparePassword = (password, hashPassword) => {
   return bcrypt.compareSync(password, hashPassword);
 };
-module.exports = { comparePassword };
+
+// Fit token in API header
+const Auth = async (req, res, next) => {
+  const token = req.body.token || req.query.token || req.headers["x-access-token"];
+  if (!token) {
+    return res.status(403).send({ message: "A token is required for authentication" });
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.API_KEY);
+    req.user = decoded;
+    console.log('Decord user...', req.user);
+  } catch (err) {
+    return res.status(401).send({ messaage: "Invalid Token" });
+  }
+  return next();
+}
+
+module.exports = { comparePassword, Auth };
 
 
