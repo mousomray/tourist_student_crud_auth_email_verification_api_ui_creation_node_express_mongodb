@@ -4,8 +4,11 @@ const authcontroller = require('../../controller/authcontroller/authcontroller')
 const { Auth } = require('../../middleware/auth')
 const router = express.Router()
 
-router.post('/register', uploadImage.single('image'), authcontroller.register)
-router.post('/login', authcontroller.login)
-router.get('/dashboard', Auth, authcontroller.dashboard)
+router.post('/register', uploadImage.single('image'), authcontroller.register) // Register
+router.post('/login', authcontroller.login) // Login
+router.get('/dashboard', Auth, authcontroller.dashboard) // Dashboard Data
+router.post('/updatepassword', Auth, authcontroller.updatePassword) // Update Password
+router.post('/forgetpassword', authcontroller.forgotPassword); // Forget Password
+router.post('/deleteaccount', Auth, authcontroller.deleteUser); // Delete User
 
 module.exports = router

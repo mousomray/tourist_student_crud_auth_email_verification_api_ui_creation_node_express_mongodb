@@ -38,7 +38,7 @@ class authcontroller {
                 });
             }
 
-            //এই কোডটি bcrypt ব্যবহার করে পাসওয়ার্ডকে সুরক্ষিতভাবে হ্যাশ করে। প্রথমে একটি র‍্যান্ডম সাল্ট (এটি একটি র‍্যান্ডম ডেটা) তৈরি করা হয়, তারপর এই সাল্টকে পাসওয়ার্ডের সাথে মিলিয়ে একটি এনক্রিপ্টেড হ্যাশ তৈরি করা হয়। এর ফলে পাসওয়ার্ডটি সুরক্ষিত থাকে এবং ডাটাবেস যদি কখনো কম্প্রোমাইজড (ভেঙে পড়ে) হয়, তাও পাসওয়ার্ডটি সরাসরি এক্সপোজ (পাঠানো) করা যাবে না।
+            // Change password to hashing 
             const salt = bcrypt.genSaltSync(10);
             const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
@@ -124,7 +124,94 @@ class authcontroller {
             console.error("Server Error:", error.message);
             res.status(500).json({ message: "Server error" });
         }
-    };
+    }
+
+    // Update Password
+    async updatePassword(req, res) {
+        try {
+            const userId = req.user._id; // Get user ID from token
+            const { oldPassword, newPassword } = req.body;
+            if (!oldPassword || !newPassword) {
+                return res.status(400).json({
+                    message: "Both old password and new password are required"
+                });
+            }
+            if (newPassword.length < 8) {
+                return res.status(400).json({
+                    message: "New password should be at least 8 characters long"
+                });
+            }
+            const user = await UserModel.findById(userId);
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+            const isMatch = comparePassword(oldPassword, user.password);
+            if (!isMatch) {
+                return res.status(400).json({ message: "Old password is incorrect" });
+            }
+            const salt = bcrypt.genSaltSync(10);
+            const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+            user.password = hashedNewPassword;
+            await user.save();
+            res.status(200).json({ success: true, message: "Password updated successfully" });
+        } catch (error) {
+            console.error("Error updating password:", error);
+            res.status(500).json({ message: "Server error" });
+        }
+    }
+
+    // Forget Password 
+    async forgotPassword(req, res) {
+        try {
+            const { email, userId, newPassword } = req.body;
+            if (!email || !userId || !newPassword) {
+                return res.status(400).json({
+                    message: "Email, userId, and newPassword are required"
+                });
+            }
+            if (newPassword.length < 8) {
+                return res.status(400).json({
+                    message: "New password should be at least 8 characters long"
+                });
+            }
+            const user = await UserModel.findOne({ email, _id: userId });
+            if (!user) {
+                return res.status(404).json({ message: "User not found or invalid user ID" });
+            }
+            const salt = bcrypt.genSaltSync(10);
+            const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+            user.password = hashedNewPassword;
+            await user.save();
+            res.status(200).json({ success: true, message: "Password updated successfully" });
+        } catch (error) {
+            console.error("Error updating password:", error);
+            res.status(500).json({ message: "Server error" });
+        }
+    }
+
+    // Delete User Account
+    async deleteUser(req, res) {
+        try {
+            const userId = req.user._id; // Get user ID from token
+            const { password } = req.body; // Get password from request body
+            if (!password) {
+                return res.status(400).json({ message: "Password is required to delete the account" });
+            }
+            const user = await UserModel.findById(userId);
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+            const isMatch = bcrypt.compareSync(password, user.password);
+            if (!isMatch) {
+                return res.status(400).json({ message: "Incorrect password" });
+            }
+            await UserModel.findByIdAndDelete(userId);
+            res.status(200).json({ success: true, message: "User account deleted successfully" });
+        } catch (error) {
+            console.error("Error deleting user account:", error);
+            res.status(500).json({ message: "Server error" });
+        }
+    }
 
 }
 module.exports = new authcontroller()
