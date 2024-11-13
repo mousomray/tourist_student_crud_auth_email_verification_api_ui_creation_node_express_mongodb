@@ -79,7 +79,7 @@ class authcontroller {
             const isMatch = comparePassword(password, user.password)
             if (!isMatch) {
                 return res.status(400).json({
-                    message: "Invalid credentials"
+                    message: "Your providing password is incorrect"
                 })
             }
             const token = jwt.sign({
@@ -130,15 +130,20 @@ class authcontroller {
     async updatePassword(req, res) {
         try {
             const userId = req.user._id; // Get user ID from token
-            const { oldPassword, newPassword } = req.body;
-            if (!oldPassword || !newPassword) {
+            const { oldPassword, newPassword, confirmPassword } = req.body;
+            if (!oldPassword || !newPassword || !confirmPassword) {
                 return res.status(400).json({
-                    message: "Both old password and new password are required"
+                    message: "All fields are required"
                 });
             }
             if (newPassword.length < 8) {
                 return res.status(400).json({
                     message: "New password should be at least 8 characters long"
+                });
+            }
+            if (newPassword !== confirmPassword) {
+                return res.status(400).json({
+                    message: "Password do not match"
                 });
             }
             const user = await UserModel.findById(userId);
@@ -160,13 +165,14 @@ class authcontroller {
         }
     }
 
+
     // Forget Password 
     async forgotPassword(req, res) {
         try {
-            const { email, userId, newPassword } = req.body;
-            if (!email || !userId || !newPassword) {
+            const { email, userId, newPassword, confirmPassword } = req.body;
+            if (!email || !userId || !newPassword || !confirmPassword) {
                 return res.status(400).json({
-                    message: "Email, userId, and newPassword are required"
+                    message: "All fields are required"
                 });
             }
             if (newPassword.length < 8) {
@@ -174,20 +180,29 @@ class authcontroller {
                     message: "New password should be at least 8 characters long"
                 });
             }
+            if (newPassword !== confirmPassword) {
+                return res.status(400).json({
+                    message: "Password do not match"
+                });
+            }
             const user = await UserModel.findOne({ email, _id: userId });
             if (!user) {
                 return res.status(404).json({ message: "User not found or invalid user ID" });
             }
+            // Hash the new password
             const salt = bcrypt.genSaltSync(10);
             const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+            // Update user's password
             user.password = hashedNewPassword;
             await user.save();
+            // Respond with success message
             res.status(200).json({ success: true, message: "Password updated successfully" });
         } catch (error) {
             console.error("Error updating password:", error);
             res.status(500).json({ message: "Server error" });
         }
     }
+
 
     // Delete User Account
     async deleteUser(req, res) {

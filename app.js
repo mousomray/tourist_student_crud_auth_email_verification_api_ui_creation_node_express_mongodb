@@ -13,7 +13,7 @@ app.use((cors())); // Use Cors
 // Make uploads file static
 app.use('/uploads', express.static(__dirname + '/uploads'));
 
-// Auth router
+// Auth API router
 const authrouter = require('./app/router/authrouter/authrouter.js');
 app.use('/auth', authrouter);
 
