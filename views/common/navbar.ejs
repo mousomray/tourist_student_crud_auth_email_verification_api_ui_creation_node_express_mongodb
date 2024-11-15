@@ -1,0 +1,161 @@
+<nav
+  class="navbar navbar-expand-lg"
+  style="
+    background-color: #4a4a8c;
+    padding: 10px 20px;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #ffffff;
+  "
+>
+  <a
+    class="navbar-brand"
+    href="#"
+    style="
+      color: #ffffff;
+      font-weight: bold;
+      font-size: 24px;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    "
+    >MyBrand</a
+  >
+  <button
+    class="navbar-toggler"
+    type="button"
+    data-toggle="collapse"
+    data-target="#navbarNavDropdown"
+    aria-controls="navbarNavDropdown"
+    aria-expanded="false"
+    aria-label="Toggle navigation"
+    style="
+      border: none;
+      background-color: #ffffff;
+      padding: 6px;
+      border-radius: 4px;
+    "
+  >
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div
+    class="collapse navbar-collapse"
+    id="navbarNavDropdown"
+    style="justify-content: flex-end"
+  >
+    <ul class="navbar-nav">
+      <!-- Show Home link always -->
+      <li class="nav-item active">
+        <a
+          class="nav-link"
+          href="/"
+          style="
+            color: #ffffff;
+            margin: 0 10px;
+            font-size: 18px;
+            transition: color 0.3s;
+          "
+          >Home</a
+        >
+      </li>
+      <li class="nav-item active">
+        <a
+          class="nav-link"
+          href="/addstudent"
+          style="
+            color: #ffffff;
+            margin: 0 10px;
+            font-size: 18px;
+            transition: color 0.3s;
+          "
+          >Addstudent</a
+        >
+      </li>
+      <li class="nav-item active">
+        <a
+          class="nav-link"
+          href="/studentlist"
+          style="
+            color: #ffffff;
+            margin: 0 10px;
+            font-size: 18px;
+            transition: color 0.3s;
+          "
+          >Studentlist</a
+        >
+      </li>
+      <!-- Show Login if not logged in -->
+      <% if (!user) { %>
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          href="/login"
+          style="
+            color: #ffffff;
+            margin: 0 10px;
+            font-size: 18px;
+            transition: color 0.3s;
+          "
+          >Login</a
+        >
+      </li>
+      <% } else { %>
+      <!-- Show Dashboard and Logout if logged in -->
+      <li class="nav-item dropdown">
+        <a
+          class="nav-link dropdown-toggle"
+          href="#"
+          role="button"
+          data-toggle="dropdown"
+          aria-expanded="false"
+          style="
+            color: #ffffff;
+            margin: 0 10px;
+            font-size: 18px;
+            transition: color 0.3s;
+          "
+          >Profile:<%= user.name %></a
+        >
+        <div
+          class="dropdown-menu"
+          style="
+            background-color: #4a4a8c;
+            border: 1px solid #ffffff;
+            border-radius: 8px;
+          "
+        >
+          <a
+            class="dropdown-item"
+            href="/dashboard"
+            style="
+              color: #ffffff;
+              padding: 8px 16px;
+              transition: background-color 0.3s;
+            "
+            >Dashboard</a
+          >
+          <a
+            class="dropdown-item"
+            href="/updatepassword"
+            style="
+              color: #ffffff;
+              padding: 8px 16px;
+              transition: background-color 0.3s;
+            "
+            >Updatepassword</a
+          >
+          <a
+            class="dropdown-item"
+            href="/logout"
+            style="
+              color: #ffffff;
+              padding: 8px 16px;
+              transition: background-color 0.3s;
+            "
+            >Logout</a
+          >
+        </div>
+      </li>
+      <% } %>
+    </ul>
+  </div>
+</nav>

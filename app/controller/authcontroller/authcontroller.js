@@ -1,5 +1,5 @@
-const { comparePassword } = require('../../middleware/auth') // Came from middleware folder
 const UserModel = require('../../model/user') // Our user Model
+const { comparePassword } = require('../../middleware/auth') // Came from middleware folder
 const jwt = require('jsonwebtoken'); // For to add token in header
 const bcrypt = require('bcryptjs'); // For hashing password
 
@@ -8,7 +8,7 @@ class authcontroller {
     // Handle Register
     async register(req, res) {
         try {
-            // Find email from database
+            // Find email from database 
             const existingUser = await UserModel.findOne({ email: req.body.email });
             // Same email not accpected
             if (existingUser) {
@@ -37,11 +37,8 @@ class authcontroller {
                     errors: ["Profile image is required"]
                 });
             }
-
-            // Change password to hashing 
             const salt = bcrypt.genSaltSync(10);
             const hashedPassword = await bcrypt.hash(req.body.password, salt);
-
             const user = new UserModel({
                 ...req.body, password: hashedPassword, image: req.file.path
             });
@@ -79,15 +76,14 @@ class authcontroller {
             const isMatch = comparePassword(password, user.password)
             if (!isMatch) {
                 return res.status(400).json({
-                    message: "Your providing password is incorrect"
+                    message: "Invalid credentials"
                 })
             }
             const token = jwt.sign({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
-                image: user.image,
-                password: user.password
+                image: user.image
             }, process.env.API_KEY,
                 { expiresIn: "1d" })
             res.status(200).json({
@@ -96,7 +92,6 @@ class authcontroller {
                     _id: user._id,
                     name: user.name,
                     email: user.email,
-                    password: user.password,
                     image: user.image
                 },
                 token: token
@@ -124,7 +119,7 @@ class authcontroller {
             console.error("Server Error:", error.message);
             res.status(500).json({ message: "Server error" });
         }
-    }
+    };
 
     // Update Password
     async updatePassword(req, res) {
@@ -165,7 +160,6 @@ class authcontroller {
         }
     }
 
-
     // Forget Password 
     async forgotPassword(req, res) {
         try {
@@ -192,17 +186,14 @@ class authcontroller {
             // Hash the new password
             const salt = bcrypt.genSaltSync(10);
             const hashedNewPassword = await bcrypt.hash(newPassword, salt);
-            // Update user's password
             user.password = hashedNewPassword;
             await user.save();
-            // Respond with success message
             res.status(200).json({ success: true, message: "Password updated successfully" });
         } catch (error) {
             console.error("Error updating password:", error);
             res.status(500).json({ message: "Server error" });
         }
     }
-
 
     // Delete User Account
     async deleteUser(req, res) {
@@ -227,6 +218,7 @@ class authcontroller {
             res.status(500).json({ message: "Server error" });
         }
     }
+
 
 }
 module.exports = new authcontroller()

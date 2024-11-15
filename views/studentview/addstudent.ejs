@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('../common/head.ejs') %>
+
+  <body>
+    <%- include('../common/navbar.ejs') %>
+
+    <div
+      style="
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        margin: auto;
+        margin-top: 50px;
+        margin-bottom: 50px;
+      "
+    >
+      <h2 style="text-align: center; color: #333">Student Registration Form</h2>
+      <form action="/addstudentcreate" method="POST">
+        <div style="margin-bottom: 15px">
+          <label
+            for="name"
+            style="
+              display: block;
+              margin-bottom: 5px;
+              font-weight: bold;
+              color: #555;
+            "
+            >Name:</label
+          >
+          <input
+            type="text"
+            name="name"
+            id="name"
+            placeholder="Enter your name"
+            required
+            style="
+              width: 100%;
+              padding: 10px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+            "
+          />
+        </div>
+        <div style="margin-bottom: 15px">
+          <label
+            for="course"
+            style="
+              display: block;
+              margin-bottom: 5px;
+              font-weight: bold;
+              color: #555;
+            "
+            >Course:</label
+          >
+          <input
+            type="text"
+            id="course"
+            name="course"
+            placeholder="Enter your course"
+            required
+            style="
+              width: 100%;
+              padding: 10px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+            "
+          />
+        </div>
+        <div style="margin-bottom: 15px">
+          <label
+            for="batch_year"
+            style="
+              display: block;
+              margin-bottom: 5px;
+              font-weight: bold;
+              color: #555;
+            "
+            >Batch Year:</label
+          >
+          <input
+            type="number"
+            id="batch_year"
+            name="batch_year"
+            placeholder="Enter batch year"
+            required
+            style="
+              width: 100%;
+              padding: 10px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+            "
+          />
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label
+                for="language"
+                style="
+                    display: block;
+                    margin-bottom: 5px;
+                    font-weight: bold;
+                    color: #555;
+                "
+            >Language (Skills):</label>
+        
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <label style="display: flex; align-items: center;">
+                    <input type="checkbox" name="language" value="Java" style="margin-right: 10px;">
+                    Java
+                </label>
+                <label style="display: flex; align-items: center;">
+                    <input type="checkbox" name="language" value="JavaScript" style="margin-right: 10px;">
+                    JavaScript
+                </label>
+                <label style="display: flex; align-items: center;">
+                    <input type="checkbox" name="language" value="C++" style="margin-right: 10px;">
+                    C++
+                </label>
+                <label style="display: flex; align-items: center;">
+                    <input type="checkbox" name="language" value="Python" style="margin-right: 10px;">
+                    Python
+                </label>
+                <label style="display: flex; align-items: center;">
+                    <input type="checkbox" name="language" value="C#" style="margin-right: 10px;">
+                    C#
+                </label>
+                <label style="display: flex; align-items: center;">
+                    <input type="checkbox" name="language" value="Laravel" style="margin-right: 10px;">
+                    Laravel
+                </label>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 15px">
+          <label
+            for="father_name"
+            style="
+              display: block;
+              margin-bottom: 5px;
+              font-weight: bold;
+              color: #555;
+            "
+            >Father's Name:</label
+          >
+          <input
+            type="text"
+            id="father_name"
+            name="father_name"
+            placeholder="Enter father's name"
+            required
+            style="
+              width: 100%;
+              padding: 10px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+            "
+          />
+        </div>
+        <div style="margin-bottom: 15px">
+          <label
+            for="phone_no"
+            style="
+              display: block;
+              margin-bottom: 5px;
+              font-weight: bold;
+              color: #555;
+            "
+            >Phone Number:</label
+          >
+          <input
+            type="number"
+            name="phone_no"
+            id="phone_no"
+            placeholder="Enter phone number"
+            required
+            style="
+              width: 100%;
+              padding: 10px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+            "
+          />
+        </div>
+        <div style="margin-bottom: 15px">
+          <label
+            for="age"
+            style="
+              display: block;
+              margin-bottom: 5px;
+              font-weight: bold;
+              color: #555;
+            "
+            >Age:</label
+          >
+          <input
+            type="number"
+            id="age"
+            name="age"
+            placeholder="Enter your age"
+            required
+            style="
+              width: 100%;
+              padding: 10px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+            "
+          />
+        </div>
+        <div style="margin-bottom: 15px; display: flex; gap: 10px">
+          <label style="font-weight: bold; color: #555">Gender:</label>
+          <label
+            ><input type="radio" name="gender" value="Male"/>
+            Male</label
+          >
+          <label
+            ><input type="radio" name="gender" value="Female" /> Female</label
+          >
+          <label
+            ><input type="radio" name="gender" value="Other" />Other</label
+          >
+        </div>
+        <div style="margin-bottom: 15px">
+          <label
+            for="city"
+            style="
+              display: block;
+              margin-bottom: 5px;
+              font-weight: bold;
+              color: #555;
+            "
+            >City:</label
+          >
+          <input
+            type="text"
+            id="city"
+            name="city"
+            placeholder="Enter your city"
+            required
+            style="
+              width: 100%;
+              padding: 10px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+            "
+          />
+        </div>
+        <div style="text-align: center">
+          <button
+            type="submit"
+            style="
+              padding: 10px 20px;
+              background-color: #4caf50;
+              color: #fff;
+              border: none;
+              border-radius: 5px;
+              cursor: pointer;
+              font-size: 16px;
+            "
+          >
+            Submit
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <%- include('../common/footer.ejs') %>
+  </body>
+</html>

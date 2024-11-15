@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('../common/head.ejs') %>
+
+  <body>
+    <%- include('../common/navbar.ejs') %>
+
+    <%if(sucess  && sucess != ''){%>
+      <div class="alert alert-success" role="alert">
+        <%=sucess%>
+       </div>
+       <%}else if(err && err != ''){%>
+         <div class="alert alert-danger" role="alert">
+            <%=err%>
+         <%}%>
+
+    <div class="container my-5">
+      <h2 class="text-center mb-4">Student Information</h2>
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>Name</th>
+              <th>Course</th>
+              <th>Batch Year</th>
+              <th>Languages (Skills)</th>
+              <th>Father's Name</th>
+              <th>Phone Number</th>
+              <th>Age</th>
+              <th>Gender</th>
+              <th>City</th>
+              <th>Edit</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% Array.isArray(mydata) &&
+            mydata.slice(0,mydata.length).reverse().forEach((value) => { %>
+            <tr>
+              <td><%= value.name %></td>
+              <td><%= value.course %></td>
+              <td><%= value.batch_year %></td>
+              <td>
+                <% if (Array.isArray(value.language)) { %> <%=
+                value.language.join(', ') %> <% } else { %> <%= value.language
+                %> <% } %>
+              </td>
+              <td><%= value.personal_details.father_name %></td>
+              <td><%= value.personal_details.phone_no %></td>
+              <td><%= value.personal_details.age %></td>
+              <td><%= value.personal_details.gender %></td>
+              <td><%= value.personal_details.city %></td>
+              <td>
+                <a
+                  href="/singlestudent/<%= value._id %>"
+                  style="display: inline"
+                >
+                  <button class="btn btn-warning">Edit</button>
+                </a>
+              </td>
+              <td>
+                <form
+                  action="/deletestudent/<%= value._id %>"
+                  style="display: inline"
+                >
+                  <button class="btn btn-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <%- include('../common/footer.ejs') %>
+  </body>
+</html>

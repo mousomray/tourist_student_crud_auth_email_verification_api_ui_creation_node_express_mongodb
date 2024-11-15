@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('../common/head.ejs') %>
+
+  <body>
+    <%- include('../common/navbar.ejs') %>
+
+    <div
+      style="
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        margin: auto;
+        margin-top: 50px;
+        margin-bottom: 50px;
+      "
+    >
+      <h2 style="text-align: center; color: #333">Edit Student Form</h2>
+      <form action="/updatestudent/<%= student._id %>" method="POST">
+        <!-- Name Field -->
+        <div style="margin-bottom: 15px">
+          <label for="name" style="font-weight: bold; color: #555">Name:</label>
+          <input
+            type="text"
+            name="name"
+            id="name"
+            value="<%= student.name %>"
+            required
+            style="width: 100%; padding: 10px; border-radius: 5px"
+          />
+        </div>
+
+        <!-- Course Field -->
+        <div style="margin-bottom: 15px">
+          <label for="course" style="font-weight: bold; color: #555"
+            >Course:</label
+          >
+          <input
+            type="text"
+            id="course"
+            name="course"
+            value="<%= student.course %>"
+            required
+            style="width: 100%; padding: 10px; border-radius: 5px"
+          />
+        </div>
+
+        <!-- Batch Year Field -->
+        <div style="margin-bottom: 15px">
+          <label for="batch_year" style="font-weight: bold; color: #555"
+            >Batch Year:</label
+          >
+          <input
+            type="number"
+            id="batch_year"
+            name="batch_year"
+            value="<%= student.batch_year %>"
+            required
+            style="width: 100%; padding: 10px; border-radius: 5px"
+          />
+        </div>
+
+        <!-- Languages (Skills) Checkbox -->
+        <div style="margin-bottom: 15px">
+          <label style="font-weight: bold; color: #555"
+            >Languages (Skills):</label
+          >
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <% const selectedLanguages = Array.isArray(student.language) ?
+            student.language : []; %> <% const availableLanguages = ['Java',
+            'JavaScript', 'C++', 'Python', 'C#', 'Laravel']; %> <%
+            availableLanguages.forEach(lang => { %>
+            <label style="display: flex; align-items: center">
+              <input type="checkbox" name="language" value="<%= lang %>" <%=
+              selectedLanguages.includes(lang) ? 'checked' : '' %>
+              style="margin-right: 10px;" /> <%= lang %>
+            </label>
+            <% }) %>
+          </div>
+        </div>
+
+        <!-- Father's Name Field -->
+        <div style="margin-bottom: 15px">
+          <label for="father_name" style="font-weight: bold; color: #555"
+            >Father's Name:</label
+          >
+          <input
+            type="text"
+            id="father_name"
+            name="father_name"
+            value="<%= student.personal_details.father_name %>"
+            required
+            style="width: 100%; padding: 10px; border-radius: 5px"
+          />
+        </div>
+
+        <!-- Phone Number Field -->
+        <div style="margin-bottom: 15px">
+          <label for="phone_no" style="font-weight: bold; color: #555"
+            >Phone Number:</label
+          >
+          <input
+            type="number"
+            id="phone_no"
+            name="phone_no"
+            value="<%= student.personal_details.phone_no %>"
+            required
+            style="width: 100%; padding: 10px; border-radius: 5px"
+          />
+        </div>
+
+        <!-- Age Field -->
+        <div style="margin-bottom: 15px">
+          <label for="age" style="font-weight: bold; color: #555">Age:</label>
+          <input
+            type="number"
+            id="age"
+            name="age"
+            value="<%= student.personal_details.age %>"
+            required
+            style="width: 100%; padding: 10px; border-radius: 5px"
+          />
+        </div>
+
+        <!-- Gender Radio Buttons -->
+        <div style="margin-bottom: 15px">
+          <label style="font-weight: bold; color: #555">Gender:</label>
+          <div style="display: flex; gap: 10px">
+            <label>
+              <input type="radio" name="gender" value="Male" <%=
+              student.personal_details.gender === 'Male' ? 'checked' : '' %> />
+              Male
+            </label>
+            <label>
+              <input type="radio" name="gender" value="Female" <%=
+              student.personal_details.gender === 'Female' ? 'checked' : '' %>
+              /> Female
+            </label>
+            <label>
+              <input type="radio" name="gender" value="Other" <%=
+              student.personal_details.gender === 'Other' ? 'checked' : '' %> />
+              Other
+            </label>
+          </div>
+        </div>
+
+        <!-- City Field -->
+        <div style="margin-bottom: 15px">
+          <label for="city" style="font-weight: bold; color: #555">City:</label>
+          <input
+            type="text"
+            id="city"
+            name="city"
+            value="<%= student.personal_details.city %>"
+            required
+            style="width: 100%; padding: 10px; border-radius: 5px"
+          />
+        </div>
+
+        <!-- Submit Button -->
+        <div style="text-align: center">
+          <button
+            type="submit"
+            style="
+              padding: 10px 20px;
+              background-color: #4caf50;
+              color: #fff;
+              border: none;
+              border-radius: 5px;
+              cursor: pointer;
+            "
+          >
+            Update
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <%- include('../common/footer.ejs') %>
+  </body>
+</html>
