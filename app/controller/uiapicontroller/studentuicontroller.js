@@ -84,7 +84,7 @@ class studentuicontroller {
 
     // Update student
     async updatestudent(req, res) {
-        const { id } = req.params;
+        const id = req.params.id;
         try {
             const { name, course, batch_year, language, father_name, phone_no, age, gender, city, } = req.body;
             // Validate required fields
