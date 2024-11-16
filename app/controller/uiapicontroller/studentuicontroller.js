@@ -47,7 +47,7 @@ class studentuicontroller {
                 const student = new Student(studentData);
                 const savedData = await student.save();
                 console.log("Student saved:", savedData);
-                req.flash('sucess',"Student created successfully")
+                req.flash('sucess', "Student created successfully")
                 return res.redirect('/studentlist');
             } catch (error) {
                 console.error('Error saving student:', error);
@@ -72,16 +72,13 @@ class studentuicontroller {
 
     // Get Single Student 
     async singlestudent(req, res) {
-        const { id } = req.params;
+        const id = req.params.id;
         try {
             const student = await Student.findById(id);
-            if (!student) {
-                return res.status(404).send('Student not found');
-            }
             res.render('studentview/editstudent', { user: req.user, student });
         } catch (error) {
-            console.error('Error fetching student:', error);
-            return res.status(500).send('Error fetching student');
+            console.log(error);
+            res.status(500).json({ message: "Error retrieving Student data" });
         }
     }
 
@@ -128,7 +125,7 @@ class studentuicontroller {
             };
             // Save the data to the database
             await Student.findByIdAndUpdate(id, studentData);
-            req.flash('sucess',"Student updated successfully")
+            req.flash('sucess', "Student updated successfully")
             return res.redirect('/studentlist');
         } catch (error) {
             console.error('Error saving student:', error);
@@ -139,15 +136,14 @@ class studentuicontroller {
 
     // Handle DELETE for delete student
     async deleteestudent(req, res) {
-        const { id } = req.params;
+        const id = req.params.id;
         try {
             await Student.findByIdAndDelete(id);
-            console.log(`Employee with ID ${id} deleted`);
-            req.flash('sucess',"Student deleted successfully")
-            return res.redirect('/studentlist'); // Redirect product after deleting data
+            req.flash('sucess', "Student deleted successfully")
+            return res.redirect('/studentlist');
         } catch (error) {
-            console.error('Error deleting employee:', error);
-            return res.status(500).send('Error deleting employee'); 
+            console.error(error);
+            res.status(500).json({ message: "Error deleting student" });
         }
     }
 

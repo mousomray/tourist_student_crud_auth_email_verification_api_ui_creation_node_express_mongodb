@@ -6,6 +6,8 @@ const router = express.Router();
 
 router.get('/register', uiauthcontroller.register) // Show Register Form
 router.post('/registercreate', uploadImage.single('image'), uiauthcontroller.register);
+router.get('/verifyuser', uiauthcontroller.verifyOtp) // For to show verify user form 
+router.post('/verifyusercreate', uiauthcontroller.verifyOtp) // For to add data verify user form 
 router.get('/login', uiauthcontroller.login) // Get data in login
 router.post('/logincreate', uiauthcontroller.login) // Post data in login
 router.get('/logout', uiauthcontroller.logout); // For Logout

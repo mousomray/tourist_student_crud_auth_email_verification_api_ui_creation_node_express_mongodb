@@ -1,5 +1,6 @@
 const UserModel = require('../../model/user');
 const { comparePassword } = require('../../middleware/auth');
+const EmailVerifyModel = require('../../model/otpverify')
 const sendEmailVerificationOTP = require('../../helper/sendEmailVerificationOTP');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -42,6 +43,64 @@ class uiauthcontroller {
             }
         }
     }
+
+
+    // Verify OTP
+    async verifyOtp(req, res) {
+        if (req.method === 'GET') {
+            return res.render('authview/userverify');
+        }
+        if (req.method === 'POST') {
+            try {
+                const { email, otp } = req.body;
+                if (!email || !otp) {
+                    return res.status(400).send("All fields are required");
+                }
+                const existingUser = await UserModel.findOne({ email });
+                if (!existingUser) {
+                    req.flash('err', 'This email is not registered')
+                    return res.redirect('/userverify');
+                }
+                if (existingUser.is_verified) {
+                    req.flash('err', 'This email is already verified')
+                    return res.redirect('/userverify');
+                }
+                const emailVerification = await EmailVerifyModel.findOne({ userId: existingUser._id, otp });
+                if (!emailVerification) {
+                    if (!existingUser.is_verified) {
+                        await sendEmailVerificationOTP(req, existingUser);
+                        req.flash('err', 'Invalid OTP new OTP is successfully sent you email')
+                        return res.redirect('/userverify');
+                    }
+                    return res.status(400).json({ status: false, message: "Invalid OTP" });
+                }
+                // Check if OTP is expired
+                const currentTime = new Date();
+                // 15 * 60 * 1000 calculates the expiration period in milliseconds(15 minutes).
+                const expirationTime = new Date(emailVerification.createdAt.getTime() + 15 * 60 * 1000);
+                if (currentTime > expirationTime) {
+                    // OTP expired, send new OTP
+                    await sendEmailVerificationOTP(req, existingUser);
+                    req.flash('err', 'OTP expired new OTP is successfully sent your email')
+                    return res.redirect('/userverify');
+                }
+                // OTP is valid and not expired, mark email as verified
+                existingUser.is_verified = true;
+                await existingUser.save();
+
+                // Delete email verification document
+                await EmailVerifyModel.deleteMany({ userId: existingUser._id });
+                req.flash('sucess', 'Your Email is Verified')
+                return res.redirect('/login');
+            } catch (error) {
+                console.error(error);
+                req.flash('err', 'Unable to verify email please try again later')
+                return res.redirect('/userverify');
+            }
+        }
+
+    }
+
 
     // For Login
     async login(req, res) {
@@ -217,7 +276,7 @@ class uiauthcontroller {
                 return res.redirect('/login');
             } catch (error) {
                 console.error("Error deleting user account:", error);
-                res.status(500).send("Server error");
+                res.status(500).send("Server error"); 
             }
         }
     }

@@ -5,7 +5,7 @@ class studentcontroller {
     // Create Student Data 
     async create(req, res) {
         try {
-            const studentdata = new Student(req.body); 
+            const studentdata = new Student(req.body);
             const data = await studentdata.save();
             res.status(201).json({ message: "Student added successfully", data });
         } catch (error) {
@@ -39,11 +39,7 @@ class studentcontroller {
         const id = req.params.id;
         try {
             const data = await Student.findById(id);
-            if (data) {
-                res.status(200).json(data);
-            } else {
-                res.status(404).json({ message: "Student not found" });
-            }
+            res.status(200).json({ message: "Single data fetched" }, data);
         } catch (error) {
             console.log(error);
             res.status(500).json({ message: "Error retrieving Student data" });
@@ -77,7 +73,7 @@ class studentcontroller {
         try {
             const deletedstudent = await Student.findByIdAndDelete(id);
             res.status(deletedstudent ? 200 : 404).json(
-                deletedstudent ? { message: "Student deleted successfully", delete: deletedstudent } : { message: "Student not found" }
+                deletedstudent ? { message: "Student deleted successfully" } : { message: "Student not found" }
             );
         } catch (error) {
             console.error(error);

@@ -57,7 +57,7 @@ class authcontroller {
                 ? { message: "Validation error", errors: Object.values(error.errors).map(err => err.message) }
                 : { message: "An unexpected error occurred" }; // Other Field validation
             console.error(error);
-            res.status(statusCode).json(message);
+            res.status(statusCode).json(message); 
         }
     }
 
@@ -271,7 +271,7 @@ class authcontroller {
             console.error("Error deleting user account:", error);
             res.status(500).json({ message: "Server error" });
         }
-    }
+    } 
 
 
 }
