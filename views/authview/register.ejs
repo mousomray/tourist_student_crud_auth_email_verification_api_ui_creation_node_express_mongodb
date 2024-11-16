@@ -5,6 +5,15 @@
     <!-- Navbar Area -->
     <%- include('../common/navbar.ejs') %>
 
+    <%if(sucess  && sucess != ''){%>
+      <div class="alert alert-success" role="alert">
+        <%=sucess%>
+       </div>
+       <%}else if(err && err != ''){%>
+         <div class="alert alert-danger" role="alert">
+            <%=err%>
+         <%}%>
+
     <!-- Registration Form Section -->
     <div
       style="

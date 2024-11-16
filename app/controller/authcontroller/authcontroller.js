@@ -1,4 +1,6 @@
 const UserModel = require('../../model/user') // Our user Model
+const EmailVerifyModel = require('../../model/otpverify')
+const sendEmailVerificationOTP = require('../../helper/sendEmailVerificationOTP');
 const { comparePassword } = require('../../middleware/auth') // Came from middleware folder
 const jwt = require('jsonwebtoken'); // For to add token in header
 const bcrypt = require('bcryptjs'); // For hashing password
@@ -43,9 +45,12 @@ class authcontroller {
                 ...req.body, password: hashedPassword, image: req.file.path
             });
             const savedUser = await user.save();
+            // Sent OTP after successfull register
+            sendEmailVerificationOTP(req, user)
             res.status(201).json({
-                message: "User created successfully", data: savedUser
-            });
+                message: "Registration successfull and send otp in your email id",
+                user: savedUser
+            })
         } catch (error) {
             const statusCode = error.name === 'ValidationError' ? 400 : 500;
             const message = error.name === 'ValidationError'
@@ -53,6 +58,51 @@ class authcontroller {
                 : { message: "An unexpected error occurred" }; // Other Field validation
             console.error(error);
             res.status(statusCode).json(message);
+        }
+    }
+
+
+    // Verify OTP
+    async verifyOtp(req, res) {
+        try {
+            const { email, otp } = req.body;
+            if (!email || !otp) {
+                return res.status(400).json({ status: false, message: "All fields are required" });
+            }
+            const existingUser = await UserModel.findOne({ email });
+            if (!existingUser) {
+                return res.status(404).json({ status: "failed", message: "Email doesn't exists" });
+            }
+            if (existingUser.is_verified) {
+                return res.status(400).json({ status: false, message: "Email is already verified" });
+            }
+            const emailVerification = await EmailVerifyModel.findOne({ userId: existingUser._id, otp });
+            if (!emailVerification) {
+                if (!existingUser.is_verified) {
+                    await sendEmailVerificationOTP(req, existingUser);
+                    return res.status(400).json({ status: false, message: "Invalid OTP, new OTP sent to your email" });
+                }
+                return res.status(400).json({ status: false, message: "Invalid OTP" });
+            }
+            // Check if OTP is expired
+            const currentTime = new Date();
+            // 15 * 60 * 1000 calculates the expiration period in milliseconds(15 minutes).
+            const expirationTime = new Date(emailVerification.createdAt.getTime() + 15 * 60 * 1000);
+            if (currentTime > expirationTime) {
+                // OTP expired, send new OTP
+                await sendEmailVerificationOTP(req, existingUser);
+                return res.status(400).json({ status: "failed", message: "OTP expired, new OTP sent to your email" });
+            }
+            // OTP is valid and not expired, mark email as verified
+            existingUser.is_verified = true;
+            await existingUser.save();
+
+            // Delete email verification document
+            await EmailVerifyModel.deleteMany({ userId: existingUser._id });
+            return res.status(200).json({ status: true, message: "Email verified successfully" });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ status: false, message: "Unable to verify email, please try again later" });
         }
     }
 
@@ -72,6 +122,10 @@ class authcontroller {
                 return res.status(400).json({
                     message: "User not found"
                 })
+            }
+            // Check if user verified
+            if (!user.is_verified) {
+                return res.status(401).json({ status: false, message: "Your account is not verified" });
             }
             const isMatch = comparePassword(password, user.password)
             if (!isMatch) {

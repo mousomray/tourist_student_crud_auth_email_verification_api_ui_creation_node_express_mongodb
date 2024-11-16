@@ -21,7 +21,9 @@ const UserSchema = new Schema({
     image: {
         type: String,
         required: "Image is required"
-    }
+    },
+    is_verified: { type: Boolean, default: false },
+    roles: { type: [String], enum: ["user", "admin"], default: ["user"] },
 
 
 })

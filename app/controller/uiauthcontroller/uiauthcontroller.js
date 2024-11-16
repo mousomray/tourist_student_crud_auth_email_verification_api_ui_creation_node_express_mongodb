@@ -1,5 +1,6 @@
 const UserModel = require('../../model/user');
 const { comparePassword } = require('../../middleware/auth');
+const sendEmailVerificationOTP = require('../../helper/sendEmailVerificationOTP');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -18,7 +19,8 @@ class uiauthcontroller {
                 }
                 const existingUser = await UserModel.findOne({ email });
                 if (existingUser) {
-                    return res.status(400).send('User already exists with this email.');
+                    req.flash('err', 'User already exist with this email');
+                    return res.redirect('/register');
                 }
                 if (password.length < 8) {
                     return res.status(400).send('Password should be at least 8 characters long.');
@@ -31,7 +33,8 @@ class uiauthcontroller {
                 });
                 // Save user to database
                 await user.save();
-                req.flash('sucess', 'Register Successfully')
+                sendEmailVerificationOTP(req, user)
+                req.flash('sucess', 'Register Successfully OTP sent your email')
                 return res.redirect('/login');
             } catch (error) {
                 console.error('Error during registration:', error);
@@ -54,11 +57,18 @@ class uiauthcontroller {
                 }
                 const user = await UserModel.findOne({ email });
                 if (!user) {
-                    return res.status(400).send('User not found');
+                    req.flash('err', 'User Not Found');
+                    return res.redirect('/login');
+                }
+                // Check if user verified
+                if (!user.is_verified) {
+                    req.flash('err', 'User is Not Verified');
+                    return res.redirect('/login');
                 }
                 const isMatch = comparePassword(password, user.password);
                 if (!isMatch) {
-                    return res.status(400).send('Invalid credential');
+                    req.flash('err', 'Invalid Credential');
+                    return res.redirect('/login');
                 }
                 // Generate a JWT token
                 const token = jwt.sign({
@@ -74,6 +84,7 @@ class uiauthcontroller {
                     req.flash('sucess', 'Login Successfully')
                     return res.redirect('/dashboard');
                 } else {
+                    req.flash('err', 'Something went wrong')
                     return res.redirect('/login');
                 }
             } catch (error) {
@@ -187,15 +198,18 @@ class uiauthcontroller {
                 const userId = req.user._id; // Get user ID from token
                 const { password } = req.body; // Get password from request body
                 if (!password) {
-                    return res.status(400).send("Password is required to delete the account");
+                    req.flash('err', 'Password is required to delete this account')
+                    return res.redirect('/deleteuser');
                 }
                 const user = await UserModel.findById(userId);
                 if (!user) {
-                    return res.status(404).send("User not found");
+                    req.flash('err', 'User not found')
+                    return res.redirect('/deleteuser');
                 }
                 const isMatch = bcrypt.compareSync(password, user.password);
                 if (!isMatch) {
-                    return res.status(400).send("Incorrect password");
+                    req.flash('err', 'Incorrect password')
+                    return res.redirect('/deleteuser');
                 }
                 await UserModel.findByIdAndDelete(userId);
                 res.clearCookie('user_auth');
