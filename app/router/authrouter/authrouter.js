@@ -9,7 +9,8 @@ router.post('/verifyotp', authcontroller.verifyOtp) // For verify OTP
 router.post('/login', authcontroller.login) // Login
 router.get('/dashboard', Auth, authcontroller.dashboard) // Dashboard Data
 router.post('/updatepassword', Auth, authcontroller.updatePassword) // Update Password
-router.post('/forgetpassword', authcontroller.forgotPassword); // Forget Password
+router.post('/resetpasswordlink', authcontroller.resetpasswordlink)//Reset Password link
+router.post('/forgetpassword/:id/:token', authcontroller.forgetPassword)//Forget password
 router.post('/deleteaccount', Auth, authcontroller.deleteUser); // Delete User
 
 module.exports = router

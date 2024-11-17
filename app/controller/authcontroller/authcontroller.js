@@ -1,6 +1,7 @@
 const UserModel = require('../../model/user') // Our user Model
 const EmailVerifyModel = require('../../model/otpverify')
 const sendEmailVerificationOTP = require('../../helper/sendEmailVerificationOTP');
+const transporter = require('../../config/emailtransporter')
 const { comparePassword } = require('../../middleware/auth') // Came from middleware folder
 const jwt = require('jsonwebtoken'); // For to add token in header
 const bcrypt = require('bcryptjs'); // For hashing password
@@ -57,7 +58,7 @@ class authcontroller {
                 ? { message: "Validation error", errors: Object.values(error.errors).map(err => err.message) }
                 : { message: "An unexpected error occurred" }; // Other Field validation
             console.error(error);
-            res.status(statusCode).json(message); 
+            res.status(statusCode).json(message);
         }
     }
 
@@ -214,39 +215,77 @@ class authcontroller {
         }
     }
 
-    // Forget Password 
-    async forgotPassword(req, res) {
+    // Reset Password link 
+    async resetpasswordlink(req, res) {
         try {
-            const { email, userId, newPassword, confirmPassword } = req.body;
-            if (!email || !userId || !newPassword || !confirmPassword) {
-                return res.status(400).json({
-                    message: "All fields are required"
-                });
+            const { email } = req.body;
+            if (!email) {
+                return res.status(400).json({ status: false, message: "Email field is required" });
             }
-            if (newPassword.length < 8) {
-                return res.status(400).json({
-                    message: "New password should be at least 8 characters long"
-                });
-            }
-            if (newPassword !== confirmPassword) {
-                return res.status(400).json({
-                    message: "Password do not match"
-                });
-            }
-            const user = await UserModel.findOne({ email, _id: userId });
+            const user = await UserModel.findOne({ email });
             if (!user) {
-                return res.status(404).json({ message: "User not found or invalid user ID" });
+                return res.status(404).json({ status: false, message: "Email doesn't exist" });
             }
-            // Hash the new password
-            const salt = bcrypt.genSaltSync(10);
-            const hashedNewPassword = await bcrypt.hash(newPassword, salt);
-            user.password = hashedNewPassword;
-            await user.save();
-            res.status(200).json({ success: true, message: "Password updated successfully" });
+            // Generate token for password reset
+            const secret = user._id + process.env.API_KEY;
+            const token = jwt.sign({ userID: user._id }, secret, { expiresIn: '20m' });
+            console.log("My forget token...", token)
+            // Reset Link and this link generate by frontend developer
+            // FRONTEND_HOST_FORGETPASSWORD = http://localhost:3004/forgetpassword
+            const resetLink = `${process.env.FRONTEND_HOST_FORGETPASSWORD}/${user._id}/${token}`;
+            // Send password reset email  
+            await transporter.sendMail({
+                from: process.env.EMAIL_FROM,
+                to: user.email,
+                subject: "Password Reset Link",
+                html: `<p>Hello ${user.name},</p><p>Please <a href="${resetLink}">Click here</a> to reset your password.</p>`
+            });
+            // Send success response
+            res.status(200).json({ status: true, message: "Password reset email sent. Please check your email." });
+
         } catch (error) {
-            console.error("Error updating password:", error);
-            res.status(500).json({ message: "Server error" });
+            console.log(error);
+            res.status(500).json({ status: false, message: "Unable to send password reset email. Please try again later." });
+
         }
+
+    }
+
+    // Forget Password 
+    async forgetPassword(req, res) {
+        try {
+            const { id, token } = req.params;
+            const { password, confirmPassword } = req.body;
+            const user = await UserModel.findById(id);
+            if (!user) {
+                return res.status(404).json({ status: false, message: "User not found" });
+            }
+            // Validate token check 
+            const new_secret = user._id + process.env.API_KEY;
+            jwt.verify(token, new_secret);
+
+            if (!password || !confirmPassword) {
+                return res.status(400).json({ status: false, message: "New Password and Confirm New Password are required" });
+            }
+
+            if (password !== confirmPassword) {
+                return res.status(400).json({ status: false, message: "New Password and Confirm New Password don't match" });
+            }
+            // Generate salt and hash new password
+            const salt = await bcrypt.genSalt(10);
+            const newHashPassword = await bcrypt.hash(password, salt);
+
+            // Update user's password
+            await UserModel.findByIdAndUpdate(user._id, { $set: { password: newHashPassword } });
+
+            // Send success response
+            res.status(200).json({ status: "success", message: "Password reset successfully" });
+
+        } catch (error) {
+            console.log("Error updating password...", error)
+            return res.status(500).json({ status: "failed", message: "Unable to reset password. Please try again later." });
+        }
+
     }
 
     // Delete User Account
@@ -271,7 +310,7 @@ class authcontroller {
             console.error("Error deleting user account:", error);
             res.status(500).json({ message: "Server error" });
         }
-    } 
+    }
 
 
 }

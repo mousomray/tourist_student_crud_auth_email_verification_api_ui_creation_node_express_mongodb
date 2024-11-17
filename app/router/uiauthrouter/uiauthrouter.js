@@ -12,10 +12,12 @@ router.get('/login', uiauthcontroller.login) // Get data in login
 router.post('/logincreate', uiauthcontroller.login) // Post data in login
 router.get('/logout', uiauthcontroller.logout); // For Logout
 router.get('/dashboard', uiAuth, uiauthcontroller.dashboardpage); // For Dashboard
-router.get('/forgetpassword', uiauthcontroller.forgotpassword); // Show Forget Form
-router.post('/forgetpasswordcreate', uiauthcontroller.forgotpassword); // Post data in Forget
 router.get('/updatepassword',uiAuth, uiauthcontroller.updatepassword); // Show Update Form 
 router.post('/updatepasswordcreate', uiAuth, uiauthcontroller.updatepassword); // Post Update
+router.get('/passwordresetlink', uiauthcontroller.resetpasswordlink);// Show reset link from
+router.post('/passwordresetlinkcreate', uiauthcontroller.resetpasswordlink);// Show Data 
+router.get('/forgetpassword/:id/:token', uiauthcontroller.forgetPassword) // Show Forget Form
+router.post('/forgetpasswordcreate/:id/:token', uiauthcontroller.forgetPassword) //Add data
 router.get('/deleteuser', uiAuth, uiauthcontroller.deleteUser); // Show delete user form 
 router.post('/deleteusercreate', uiAuth, uiauthcontroller.deleteUser); // Post delete user
 

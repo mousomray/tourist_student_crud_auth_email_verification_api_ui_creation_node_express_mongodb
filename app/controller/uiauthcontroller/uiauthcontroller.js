@@ -2,6 +2,7 @@ const UserModel = require('../../model/user');
 const { comparePassword } = require('../../middleware/auth');
 const EmailVerifyModel = require('../../model/otpverify')
 const sendEmailVerificationOTP = require('../../helper/sendEmailVerificationOTP');
+const transporter = require('../../config/emailtransporter')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -174,40 +175,6 @@ class uiauthcontroller {
         return res.redirect('/login');
     }
 
-    // Forget Password
-    async forgotpassword(req, res) {
-        if (req.method === 'GET') {
-            return res.render('authview/forgetpassword', { user: req.user });
-        }
-        if (req.method === 'POST') {
-            try {
-                const { email, userId, newPassword, confirmPassword } = req.body;
-                if (!email || !userId || !newPassword || !confirmPassword) {
-                    return res.status(400).send('All fields are required.');
-                }
-                if (newPassword.length < 8) {
-                    return res.status(400).send('New password should be at least 8 characters long.');
-                }
-                if (newPassword !== confirmPassword) {
-                    return res.status(400).send('Passwords do not match.');
-                }
-                const user = await UserModel.findOne({ email, _id: userId });
-                if (!user) {
-                    return res.status(404).send('User not found or invalid user ID.');
-                }
-                const salt = bcrypt.genSaltSync(10);
-                const hashedNewPassword = await bcrypt.hash(newPassword, salt);
-                user.password = hashedNewPassword;
-                await user.save();
-                req.flash('sucess', 'Password update successfully')
-                return res.redirect('/login');
-            } catch (error) {
-                console.error('Error updating password:', error);
-                return res.status(500).send('An unexpected error occurred.');
-            }
-        }
-    }
-
     // Update Password
     async updatepassword(req, res) {
         if (req.method === 'GET') {
@@ -247,6 +214,99 @@ class uiauthcontroller {
         }
     }
 
+    // Reset Password UI link
+    async resetpasswordlink(req, res) {
+        if (req.method === 'GET') {
+            return res.render('authview/passwordreset', { user: req.user })
+        }
+        if (req.method === 'POST') {
+            try {
+                const { email } = req.body;
+                if (!email) {
+                    req.flash('err', 'Email is Required')
+                    return res.redirect('/passwordresetlink');
+                }
+                const user = await UserModel.findOne({ email });
+                if (!user) {
+                    req.flash('err', 'Email doesnot exist')
+                    return res.redirect('/passwordresetlink');
+                }
+                // Generate token for password reset
+                const secret = user._id + process.env.API_KEY;
+                const token = jwt.sign({ userID: user._id }, secret, { expiresIn: '20m' });
+                console.log("My forget token...", token)
+                // Reset Link and this link generate by frontend developer
+                // FRONTEND_HOST_FORGETPASSWORD = http://localhost:3004/forgetpassword
+                const resetLink = `${process.env.FRONTEND_HOST_FORGETPASSWORD}/${user._id}/${token}`;
+                // Send password reset email  
+                await transporter.sendMail({
+                    from: process.env.EMAIL_FROM,
+                    to: user.email,
+                    subject: "Password Reset Link",
+                    html: `<p>Hello ${user.name},</p><p>Please <a href="${resetLink}">Click here</a> to reset your password.</p>`
+                });
+                // Send success response
+                req.flash('sucess', 'Verification link sent check your email')
+                return res.redirect('/passwordresetlink');
+
+            } catch (error) {
+                console.log(error);
+                req.flash('err', 'Error something went wrong')
+                return res.redirect('/passwordresetlink');
+
+            }
+        }
+    }
+
+
+    // Forget Password
+    async forgetPassword(req, res) {
+        const { id, token } = req.params;
+        if (req.method === 'GET') {
+            return res.render('authview/forgetpassword', { userId: id, token: token });
+        }
+        if (req.method === 'POST') {
+            try {
+                const { id, token } = req.params;
+                const { password, confirmPassword } = req.body;
+                const user = await UserModel.findById(id);
+                console.log("My user...", user)
+                if (!user) {
+                    req.flash('err', 'User Not Found')
+                    return res.redirect(`/forgetpassword/${id}/${token}`);
+                }
+                // Validate token check 
+                const new_secret = user._id + process.env.API_KEY;
+                jwt.verify(token, new_secret);
+
+                if (!password || !confirmPassword) {
+                    req.flash('err', 'New password and confirm password are required')
+                    return res.redirect(`/forgetpassword/${id}/${token}`);
+                }
+
+                if (password !== confirmPassword) {
+                    req.flash('err', 'New password and confirm password are not matched')
+                    return res.redirect(`/forgetpassword/${id}/${token}`);
+                }
+                // Generate salt and hash new password
+                const salt = await bcrypt.genSalt(10);
+                const newHashPassword = await bcrypt.hash(password, salt);
+
+                // Update user's password
+                await UserModel.findByIdAndUpdate(user._id, { $set: { password: newHashPassword } });
+
+                // Send success response
+                req.flash('sucess', 'Password changes successfully')
+                return res.redirect('/login');
+
+            } catch (error) {
+                req.flash('err', 'Error updating password')
+                return res.redirect(`/forgetpassword/${id}/${token}`);
+            }
+        }
+    }
+
+
     // Delete User Account
     async deleteUser(req, res) {
         if (req.method === 'GET') {
@@ -276,7 +336,7 @@ class uiauthcontroller {
                 return res.redirect('/login');
             } catch (error) {
                 console.error("Error deleting user account:", error);
-                res.status(500).send("Server error"); 
+                res.status(500).send("Server error");
             }
         }
     }

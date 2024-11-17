@@ -10,7 +10,8 @@ const sendEmailVerificationOTP = async (req, user) => {
   console.log('hh', gg);
 
   //  OTP Verification Link
-  const otpVerificationLink = process.env.FRONTEND_HOST;
+  // FRONTEND_HOST_VERIFYEMAIL = http://localhost:3004/verifyuser
+  const otpVerificationLink = process.env.FRONTEND_HOST_VERIFYEMAIL;
 
   await transporter.sendMail({
     from: process.env.EMAIL_FROM,
