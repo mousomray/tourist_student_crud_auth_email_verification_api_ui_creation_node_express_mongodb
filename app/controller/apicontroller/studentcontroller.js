@@ -5,7 +5,7 @@ class studentcontroller {
     // Create Student Data 
     async create(req, res) {
         try {
-            const studentdata = new Student(req.body);
+            const studentdata = new Student(req.body); 
             const data = await studentdata.save();
             res.status(201).json({ message: "Student added successfully", data });
         } catch (error) {

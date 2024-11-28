@@ -1,4 +1,6 @@
 const Tourist = require('../../model/tourist');
+const path = require('path');
+const fs = require('fs');
 
 class touristcontroller {
 
@@ -60,6 +62,23 @@ class touristcontroller {
     // Update Data
     async touristupdate(req, res) {
         const id = req.params.id;
+        // Deleting image from uploads folder start
+        if (req.file) {
+            const tourist = await Tourist.findById(id);
+            const imagePath = path.resolve(__dirname, '../../../', tourist.image);
+            if (fs.existsSync(imagePath)) {
+                fs.unlink(imagePath, (err) => {
+                    if (err) {
+                        console.error('Error deleting image file:', err);
+                    } else {
+                        console.log('Image file deleted successfully:', tourist.image);
+                    }
+                });
+            } else {
+                console.log('File does not exist:', imagePath);
+            }
+        }
+        // Deleting image from uploads folder end
         try {
             const updatedtourist = await Tourist.findByIdAndUpdate(id, req.body, { new: true, runValidators: true }
             );
@@ -86,10 +105,25 @@ class touristcontroller {
     // Delete Tourist
     async touristdelete(req, res) {
         const id = req.params.id;
+        // Deleting image from uploads folder start
+        const tourist = await Tourist.findById(id);
+        const imagePath = path.resolve(__dirname, '../../../', tourist.image);
+        if (fs.existsSync(imagePath)) {
+            fs.unlink(imagePath, (err) => {
+                if (err) {
+                    console.error('Error deleting image file:', err);
+                } else {
+                    console.log('Image file deleted successfully:', tourist.image);
+                }
+            });
+        } else {
+            console.log('File does not exist:', imagePath);
+        }
+        // Deleting image from uploads folder end
         try {
             const deletedtourist = await Tourist.findByIdAndDelete(id);
             res.status(deletedtourist ? 200 : 404).json(
-                deletedtourist ? { message: "Tourist deleted successfully", delete: deletedtourist } : { message: "Tourist not found" }
+                deletedtourist ? { message: "Tourist deleted successfully"} : { message: "Tourist not found" }
             );
         } catch (error) {
             console.error(error);
