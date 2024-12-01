@@ -184,21 +184,26 @@ class uiauthcontroller {
             const userId = req.user._id; // Get user ID from token
             const { oldPassword, newPassword, confirmPassword } = req.body;
             if (!oldPassword || !newPassword || !confirmPassword) {
-                return res.status(400).send("All fields are required");
+                req.flash('err', "All fields are required")
+                return res.redirect('/updatepassword')
             }
             if (newPassword.length < 8) {
-                return res.status(400).send("New password should be at least 8 characters long");
+                req.flash('err', "Password should be atleast 8 characters long")
+                return res.redirect('/updatepassword')
             }
             if (newPassword !== confirmPassword) {
-                return res.status(400).send("Password do not match");
+                req.flash('err', "Password don't match")
+                return res.redirect('/updatepassword')
             }
             const user = await UserModel.findById(userId);
             if (!user) {
-                return res.status(404).send("User not found");
+                req.flash('err', "User not found")
+                return res.redirect('/updatepassword')
             }
             const isMatch = comparePassword(oldPassword, user.password);
             if (!isMatch) {
-                return res.status(400).send("Old password is incorrect");
+                req.flash('err', "Old password is incorrect")
+                return res.redirect('/updatepassword')
             }
             const salt = bcrypt.genSaltSync(10);
             const hashedNewPassword = await bcrypt.hash(newPassword, salt);
@@ -207,8 +212,8 @@ class uiauthcontroller {
             req.flash('sucess', 'Password update successfully')
             return res.redirect('/dashboard');
         } catch (error) {
-            console.error("Error updating password:", error);
-            res.status(500).send("Server error");
+            req.flash('err', "Error updating password")
+            return res.redirect('/updatepassword')
         }
     }
 
@@ -279,6 +284,11 @@ class uiauthcontroller {
 
             if (!password || !confirmPassword) {
                 req.flash('err', 'New password and confirm password are required')
+                return res.redirect(`/forgetpassword/${id}/${token}`);
+            }
+
+            if (password.length < 8) {
+                req.flash('err', "Password should be atleast 8 characters long")
                 return res.redirect(`/forgetpassword/${id}/${token}`);
             }
 
