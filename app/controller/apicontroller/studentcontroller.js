@@ -5,7 +5,7 @@ class studentcontroller {
     // Create Student Data 
     async create(req, res) {
         try {
-            const studentdata = new Student(req.body); 
+            const studentdata = new Student(req.body);
             const data = await studentdata.save();
             res.status(201).json({ message: "Student added successfully", data });
         } catch (error) {
@@ -39,7 +39,7 @@ class studentcontroller {
         const id = req.params.id;
         try {
             const data = await Student.findById(id);
-            res.status(200).json({ message: "Single data fetched" }, data);
+            res.status(200).json({ message: "Single data fetched", data });
         } catch (error) {
             console.log(error);
             res.status(500).json({ message: "Error retrieving Student data" });

@@ -49,6 +49,7 @@ class authcontroller {
             // Sent OTP after successfull register
             sendEmailVerificationOTP(req, user)
             res.status(201).json({
+                sucess: true,
                 message: "Registration successfull and send otp in your email id",
                 user: savedUser
             })
@@ -142,6 +143,7 @@ class authcontroller {
             }, process.env.API_KEY,
                 { expiresIn: "1d" })
             res.status(200).json({
+                sucess: true,
                 message: "User login successfully",
                 data: {
                     _id: user._id,
