@@ -38,7 +38,7 @@ class uiauthcontroller {
             await user.save();
             sendEmailVerificationOTP(req, user)
             req.flash('sucess', 'Register Successfully OTP sent your email')
-            return res.redirect('/login');
+            return res.redirect('/verifyuser');
         } catch (error) {
             console.error('Error during registration:', error);
             return res.status(500).send('An unexpected error occurred.');
